@@ -1,0 +1,6 @@
+{
+    "package-name": "jumpsuite-categorisation",
+    "installed-apps": [
+        "categorisation"
+    ]
+}
