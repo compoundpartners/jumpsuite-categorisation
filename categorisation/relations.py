@@ -18,7 +18,7 @@ from gm2m.helpers import GM2MModel, is_fake_model
 from gm2m import fields
 from gm2m.relations import GM2MRel
 
-from .models import create_gm2m_intermediary_model, THROUGH_FIELDS
+from .monkeypatch import create_gm2m_intermediary_model, THROUGH_FIELDS
 
 class CGM2MRel(GM2MRel):
 
