@@ -160,3 +160,21 @@ def fixed_queryset_iter(self):
                 yield objects[(ct, pk)]
 
 GM2MTgtQuerySetIterable.__iter__ = fixed_queryset_iter
+
+
+from django.contrib.admin import utils
+from django.utils.html import conditional_escape
+from categorisation import fields
+
+old_display_for_field = utils.display_for_field
+
+def display_for_field(value, field, empty_value_display):
+    if isinstance(field.remote_field, fields.CategorisationField):
+        return conditional_escape(", ".join(map(str, value.all())))
+    return old_display_for_field(value, field, empty_value_display)
+
+utils.display_for_field = display_for_field
+
+
+    
+
