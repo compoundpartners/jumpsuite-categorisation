@@ -1,4 +1,5 @@
 from django.core.exceptions import FieldDoesNotExist
+from django.db import router
 from django.db.models import Q, Manager
 from django.db.models.fields import Field
 from gm2m.contenttypes import ct, get_content_type
@@ -81,4 +82,19 @@ def _to_change(self, objs, db):
         self.through._default_manager.using(db).bulk_update(to_update, ['sort_value'])
     return to_add, Q(pk__in=to_remove)
 
+def get_queryset(self):
+    try:
+        return self.instance \
+                    ._prefetched_objects_cache[self.prefetch_cache_name]
+    except (AttributeError, KeyError):
+        db = self._db or router.db_for_read(self.instance.__class__,
+                                            instance=self.instance)
+        if self.field.sorted:
+            model_name = self.model._meta.model_name
+            return self._get_queryset(using=db)._next_is_sticky() \
+                        .filter(**self.core_filters).order_by(f'{model_name}_related__sort_value')
+        return self._get_queryset(using=db)._next_is_sticky() \
+                    .filter(**self.core_filters)
+        
 GM2MBaseSrcManager._to_change = _to_change
+GM2MBaseSrcManager.get_queryset = get_queryset
