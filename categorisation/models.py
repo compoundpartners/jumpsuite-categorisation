@@ -162,18 +162,18 @@ def fixed_queryset_iter(self):
 GM2MTgtQuerySetIterable.__iter__ = fixed_queryset_iter
 
 
-from django.contrib.admin import utils
+from django.contrib.admin import utils as admin_utils
 from django.utils.html import conditional_escape
 from categorisation import fields
 
-old_display_for_field = utils.display_for_field
+def add_display_for_gm2m(func):
+    def wrapper(value, field, empty_value_display):
+        if isinstance(field.remote_field, fields.CategorisationField):
+            return conditional_escape(", ".join(map(str, value.all())))
+        return func(value, field, empty_value_display)
+    return wrapper
 
-def display_for_field(value, field, empty_value_display):
-    if isinstance(field.remote_field, fields.CategorisationField):
-        return conditional_escape(", ".join(map(str, value.all())))
-    return old_display_for_field(value, field, empty_value_display)
-
-utils.display_for_field = display_for_field
+admin_utils.display_for_field = add_display_for_gm2m(admin_utils.display_for_field)
 
 
     
