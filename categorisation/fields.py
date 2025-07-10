@@ -48,19 +48,26 @@ def _to_change(self, objs, db):
     to_remove = set()
     to_update = set()
     for sort_value, obj in enumerate(objs, 1):
-        if obj.pk in vals:
+        if hasattr(obj, 'pk'):
+            pk = obj.pk
+        else:
+            try:
+                pk = int(obj)
+            except ValueError:
+                continue
+        if pk in vals:
             if self.field.sorted:
-                through = vals[obj.pk]
+                through = vals[pk]
                 if through.sort_value != sort_value:
                     through.sort_value = sort_value
                     to_update.add(through)
-                del vals[obj.pk]
+                del vals[pk]
             else:
-                vals.remove(obj.pk)
+                vals.remove(pk)
         else:
             insert = {
                 '%s_id' % self.field_names['src']:
-                    obj.pk,
+                    pk,
                 self.field_names['tgt_ct']: inst_ct,
                 self.field_names['tgt_fk']: self.pk,
             }
